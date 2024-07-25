@@ -15,10 +15,7 @@ def home(request: HttpRequest) -> HttpResponse:
 
 
 def room(request: HttpRequest, pk: str) -> HttpResponse:
-    room = None
-    for possible_room in rooms:
-        if possible_room['id'] == int(pk):
-            room = possible_room
-            break
-    context = {'room': room}
+    rooms_dict = {r['id']: r for r in rooms}
+    selected_room = rooms_dict.get(int(pk))
+    context = {'room': selected_room}
     return render(request, 'base/room.html', context)
