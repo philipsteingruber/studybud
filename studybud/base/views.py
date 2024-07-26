@@ -2,20 +2,22 @@
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import render
 
-rooms = [
-    {'id': 1, 'name': "Let's learn Python!"},
-    {'id': 2, 'name': "Let's learn C!"},
-    {'id': 3, 'name': "Let's learn Java!"},
-]
+from .forms import RoomForm
+from .models import Room
 
 
 def home(request: HttpRequest) -> HttpResponse:
+    rooms = Room.objects.all()
     context = {'rooms': rooms}
     return render(request, 'base/home.html', context)
 
 
 def room(request: HttpRequest, pk: str) -> HttpResponse:
-    rooms_dict = {r['id']: r for r in rooms}
-    selected_room = rooms_dict.get(int(pk))
-    context = {'room': selected_room}
+    context = {'room': Room.objects.get(id=pk)}
     return render(request, 'base/room.html', context)
+
+
+def create_room(request: HttpRequest) -> HttpResponse:
+    form = RoomForm()
+    context = {'form': form}
+    return render(request, 'base/room_form.html', context)
