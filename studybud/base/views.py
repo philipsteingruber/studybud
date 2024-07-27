@@ -21,7 +21,7 @@ def login_page(request: HttpRequest) -> HttpResponse:
 
         try:
             user = User.objects.get(username=username)
-        except:
+        except User.DoesNotExist:
             messages.error(request, 'Username or password is incorrect.')
 
         user = authenticate(request, username=username, password=password)
