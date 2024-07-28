@@ -72,8 +72,9 @@ def home(request: HttpRequest) -> HttpResponse:
     )
     topics = Topic.objects.all()
     room_count = rooms.count()
+    activity_messages = Message.objects.filter(Q(room__topic__name__icontains=q)).order_by('-updated')
 
-    context = {'rooms': rooms, 'topics': topics, 'room_count': room_count}
+    context = {'rooms': rooms, 'topics': topics, 'room_count': room_count, 'activity_messages': activity_messages}
     return render(request, 'base/home.html', context)
 
 
