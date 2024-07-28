@@ -92,6 +92,15 @@ def view_room(request: HttpRequest, pk: str) -> HttpResponse:
     return render(request, 'base/room.html', context)
 
 
+def user_profile(request: HttpRequest, pk: str) -> HttpResponse:
+    user = User.objects.get(id=pk)
+    rooms = user.room_set.all()
+    activity_messages = user.message_set.all().order_by('-created')
+    topics = Topic.objects.all()
+    context = {'user': user, 'rooms': rooms, 'activity_messages': activity_messages, 'topics': topics}
+    return render(request, 'base/profile.html', context)
+
+
 @login_required(login_url='login')
 def create_room(request: HttpRequest) -> HttpResponse:
     form = RoomForm()
