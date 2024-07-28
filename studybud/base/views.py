@@ -9,7 +9,7 @@ from django.http import HttpRequest, HttpResponse
 from django.shortcuts import render, redirect
 
 from .forms import RoomForm
-from .models import Room, Topic
+from .models import Room, Topic, Message
 
 
 def login_user(request: HttpRequest) -> HttpResponse:
@@ -78,7 +78,16 @@ def home(request: HttpRequest) -> HttpResponse:
 
 
 def view_room(request: HttpRequest, pk: str) -> HttpResponse:
-    context = {'room': Room.objects.get(id=pk)}
+    room = Room.objects.get(pk=pk)
+    room_messages = room.message_set.all().order_by('-created')
+    participants = room.participants.all()
+
+    if request.method == 'POST':
+        Message.objects.create(user=request.user, room=room, body=request.POST.get('body'))
+        room.participants.add(request.user)
+        return redirect('room', pk=room.id)
+
+    context = {'room': room, 'room_messages': room_messages, 'participants': participants}
     return render(request, 'base/room.html', context)
 
 
@@ -125,4 +134,19 @@ def delete_room(request: HttpRequest, pk: str) -> HttpResponse:
         return redirect('home')
 
     context = {'obj': room}
-    return render(request, 'base/delete_room.html', context)
+    return render(request, 'base/delete.html', context)
+
+
+@login_required(login_url='login')
+def delete_message(request: HttpRequest, pk: str) -> HttpResponse:
+    message = Message.objects.get(id=pk)
+
+    if request.user != message.user:
+        return HttpResponse('You are not allowed to delete this message.')
+
+    if request.method == 'POST':
+        message.delete()
+        return redirect('home')
+
+    context = {'obj': message}
+    return render(request, 'base/delete.html', context)
